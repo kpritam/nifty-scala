@@ -2,9 +2,12 @@ package com.kpritam.nifty.zio
 
 import java.io.File
 import java.time.DayOfWeek
+import java.util.concurrent.TimeUnit
 
 import zio._
+import zio.clock._
 import zio.console.{Console, putStrLn}
+import zio.duration.durationInt
 
 object ZApp extends App {
   private val input      = "/Users/pritamkadam/Downloads/Nifty final"
@@ -19,7 +22,17 @@ object ZApp extends App {
       _      <- Logger.log(output)
     } yield ()
 
-  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] = readAllCsv(input).exitCode
+  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] = measure(readAllCsv(input).exitCode)
+
+  def measure[R, E, A](f: => ZIO[R, E, A]): ZIO[Console with Clock with R, E, A] = {
+    for {
+      start <- currentTime(TimeUnit.MILLISECONDS)
+      a     <- f
+      end   <- currentTime(TimeUnit.MILLISECONDS)
+      _     <- putStrLn(s"Total time taken = ${(end - start) / 1000}s")
+    } yield a
+
+  }
 }
 
 object Logger {

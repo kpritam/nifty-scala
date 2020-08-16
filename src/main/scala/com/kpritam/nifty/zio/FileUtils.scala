@@ -3,7 +3,6 @@ package com.kpritam.nifty.zio
 import java.io.File
 import java.nio.file.{Files, Path, Paths}
 
-import zio.stream._
 import zio.{IO, Task, UIO}
 
 import scala.io.{BufferedSource, Source}
@@ -21,9 +20,7 @@ object FileUtils {
 
   private def closeSource(source: BufferedSource) = UIO(source.close())
 
-  def readCsv(name: Path): Stream[Throwable, Row] =
-    Stream
-      .bracket(IO(Source.fromFile(new File(name.toString))))(closeSource)
-      .flatMap(Row.rowReader)
+  def readCsv(name: Path): Task[List[Row]] =
+    IO(Source.fromFile(new File(name.toString))).bracket(closeSource)(s => Row.rowReader(s.getLines().mkString("\n")))
 
 }

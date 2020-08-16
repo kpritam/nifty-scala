@@ -5,10 +5,9 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import zio.stream._
-import zio.{Task, UIO}
+import zio.{Task, UIO, ZIO}
 
 import scala.io.BufferedSource
-
 import kantan.csv._
 import kantan.csv.generic._
 import kantan.csv.java8._
@@ -37,10 +36,10 @@ object Row {
 
   private def closeReader[T](reader: CsvReader[T]) = UIO(reader.close())
 
-  def rowReader(source: BufferedSource): Stream[Throwable, Row] =
-    Stream
-      .bracket(Task.effect(source.reader().asCsvReader[Row](rfc.withHeader)))(closeReader)
-      .flatMap(reader => Stream.absolve(Stream.fromIterator(reader.iterator)))
+  def rowReader(rawData: String): Task[List[Row]] =
+    Task
+      .effect(rawData.asCsvReader[Row](rfc.withHeader))
+      .bracket(closeReader)(r => Task.foreach(r.iterator.toList)(e => Task.fromEither(e)))
 
 }
 

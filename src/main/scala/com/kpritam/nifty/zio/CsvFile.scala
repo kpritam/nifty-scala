@@ -3,15 +3,13 @@ package com.kpritam.nifty.zio
 import java.nio.file.Path
 import java.time.LocalDate
 
-import zio.Task
-import zio.stream._
+import zio.{Task, ZIO}
 
 import scala.util.Try
 
-case class CsvFile(date: LocalDate, path: Path, data: Stream[Throwable, Row]) {
-  private lazy val chunk = data.runCollect
+case class CsvFile(date: LocalDate, path: Path, data: Task[List[Row]]) {
   def rowAt(time: String): Task[Row] =
-    chunk
+    data
       .map(_.find(_.time.trim.startsWith(time)))
       .someOrFail(new RuntimeException(s"$path does not contain row matching close time $time"))
 }
