@@ -44,3 +44,5 @@ project/project/.bloop
 .gradle
 */**/.kotlintest
 out
+
+output.csv

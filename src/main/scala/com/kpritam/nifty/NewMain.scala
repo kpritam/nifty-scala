@@ -1,6 +1,7 @@
 package com.kpritam.nifty
 
-import java.nio.file.{Path, Paths}
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Path, Paths}
 import java.time.DayOfWeek
 
 import com.kpritam.nifty.domain.NiftyFile
@@ -11,16 +12,29 @@ import scala.annotation.tailrec
 
 object NewMain extends App {
   private val folder = Paths.get("/Users/pritamkadam/Downloads/Nifty final")
+  private val output = "output.csv"
 
-  Nifty
-    .calculate(folder, DayOfWeek.THURSDAY, DayOfWeek.THURSDAY, startTime = "9:30", endTime = "14:30")
-    .foreach(println)
+  def write(content: String, output: String) = Files.write(Paths.get(output), content.getBytes(StandardCharsets.UTF_8))
+
+  write(
+    Nifty
+      .readRows(folder, DayOfWeek.THURSDAY, DayOfWeek.THURSDAY, startTime = "9:30", endTime = "14:30")
+      .tapEach(println)
+      .mkString("\n"),
+    output
+  )
 
 }
 
 object Nifty {
 
-  def calculate(folder: Path, startDay: DayOfWeek, endDay: DayOfWeek, startTime: String, endTime: String): List[String] = {
+  def readRows(
+      folder: Path,
+      startDay: DayOfWeek,
+      endDay: DayOfWeek,
+      startTime: String,
+      endTime: String
+  ): List[String] = {
     val allFiles: List[NiftyFile] =
       Csv
         .walk(folder)
@@ -34,26 +48,20 @@ object Nifty {
     println("=" * 80)
 
     findAll(startDay, endDay, allFiles)
-      .map {
+      .flatMap {
         case (start, end) =>
-          def read(niftyFile: NiftyFile, time: String) = {
-            val rows = niftyFile.read
+          def read(niftyFile: NiftyFile, time: String) =
+            niftyFile.read
               .fold(e => throw new RuntimeException(e.mkString(",")), identity)
               .rows
-            rows
               .find(_.time.startsWith(time))
-              .map(_.close)
-              .getOrElse {
-                println(s"Invalid file: ${niftyFile.path}")
-                "0"
-              }
-          }
+              .getOrElse(throw new RuntimeException(s"Invalid file: ${niftyFile.path}"))
 
-          val s = read(start, startTime)
-          val e = read(end, endTime)
+          val row1 = read(start, startTime)
+          val row2 = read(end, endTime)
+          val diff = row2.close.toDouble - row1.close.toDouble
 
-          val d = e.toDouble - s.toDouble
-          s"[${start.date} ${start.date.getDayOfWeek}  <-->  ${end.date} ${end.date.getDayOfWeek} = $d]"
+          List(row1.write(diff), row2.write(diff))
       }
   }
 

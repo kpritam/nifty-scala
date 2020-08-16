@@ -8,7 +8,7 @@ import com.kpritam.nifty.syntax.EitherExt.ListEitherOps
 import com.kpritam.nifty.utils.{Csv, FileUtils}
 
 case class NiftyFile private (path: Path, date: LocalDate, weekNo: Int) {
-  def read: Either[List[String], NiftyFileContent] = FileUtils.read(path).map(Row.from).sequence.map(NiftyFileContent)
+  def read: Either[List[String], NiftyFileContent] = FileUtils.read(path).map(InputRow.from).sequence.map(NiftyFileContent)
 }
 
 object NiftyFile {
