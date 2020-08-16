@@ -1,12 +1,13 @@
 package com.kpritam.nifty.domain
 
+import java.time.LocalDate
 import java.util.Date
 
 import com.kpritam.nifty.utils.DateUtils
 
 case class Row(
     ticker: String,
-    date: Date,
+    date: LocalDate,
     time: String,
     open: String,
     high: String,

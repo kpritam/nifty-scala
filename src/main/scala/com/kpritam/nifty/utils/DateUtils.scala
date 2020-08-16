@@ -1,18 +1,18 @@
 package com.kpritam.nifty.utils
 
-import java.text.SimpleDateFormat
-import java.util.{Calendar, Date}
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import scala.util.Try
 
 object DateUtils {
-  private val dateFormats = List("dd/mm/yyyy", "ddmmyyyy")
-  private val formatters  = dateFormats.map(new SimpleDateFormat(_))
+  private val dateFormats = List("dd/MM/yyyy", "ddMMyyyy")
+  private val formatters  = dateFormats.map(DateTimeFormatter.ofPattern)
 
-  def parse(date: String): Either[String, Date] = {
-    def loop(formatters: List[SimpleDateFormat]): Option[Date] =
+  def parse(date: String): Either[String, LocalDate] = {
+    def loop(formatters: List[DateTimeFormatter]): Option[LocalDate] =
       formatters match {
-        case formatter :: rest => Try(formatter.parse(date)).fold(_ => loop(rest), Some(_))
+        case formatter :: rest => Try(LocalDate.parse(date, formatter)).fold(_ => loop(rest), Some(_))
         case Nil               => None
       }
 

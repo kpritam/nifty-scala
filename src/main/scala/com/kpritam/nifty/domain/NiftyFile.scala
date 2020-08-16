@@ -1,13 +1,13 @@
 package com.kpritam.nifty.domain
 
 import java.nio.file.Path
-import java.util.Date
+import java.time.LocalDate
 
 import com.kpritam.nifty.syntax.DateExt.DateOps
 import com.kpritam.nifty.syntax.EitherExt.ListEitherOps
 import com.kpritam.nifty.utils.{Csv, FileUtils}
 
-case class NiftyFile private (path: Path, date: Date, weekNo: Int) {
+case class NiftyFile private (path: Path, date: LocalDate, weekNo: Int) {
   def read: Either[List[String], NiftyFileContent] = FileUtils.read(path).map(Row.from).sequence.map(NiftyFileContent)
 }
 
