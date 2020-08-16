@@ -1,17 +1,18 @@
 package com.kpritam.nifty.zio
 
+import java.time.DayOfWeek
+
 import zio._
-import console._
 
 object ZioApp extends App {
-  private val input = "/Users/pritamkadam/Downloads/APR-2020"
+  private val input = "/Users/pritamkadam/Downloads/Nifty final"
 
   private def readAllCsv(folder: String) =
     for {
-      data <- NiftyData.from(folder)
-      _    <- putStrLn(data.csvFiles.map(_.date).mkString("\n"))
+      data  <- NiftyData.from(folder)
+      slots <- data.partitionBy(DayOfWeek.THURSDAY, DayOfWeek.THURSDAY)
+      _     <- ZIO.foreach(slots)(_.prettyPrint)
     } yield ()
 
-  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
-    readAllCsv(input).mapError(_.getMessage).exitCode
+  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] = readAllCsv(input).exitCode
 }

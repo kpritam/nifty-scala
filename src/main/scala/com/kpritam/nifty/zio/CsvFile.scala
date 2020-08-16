@@ -4,10 +4,10 @@ import java.nio.file.Path
 import java.time.LocalDate
 
 import zio.Task
-
+import zio.stream._
 import scala.util.Try
 
-case class CsvFile(date: LocalDate, path: Path, data: List[Row])
+case class CsvFile(date: LocalDate, path: Path, data: Stream[Throwable, Row])
 
 object CsvFile {
   //name format -> GFDLNFO_NIFTY_CONTRACT_07042020.csv
@@ -25,7 +25,7 @@ object CsvFile {
       .flatMap(DateUtils.parse)
 
   def from(file: Path): Task[CsvFile] =
-    extractDate(file).flatMap(date => FileUtils.readCsv(file).map(CsvFile(date, file, _)))
+    extractDate(file).map(date => CsvFile(date, file, FileUtils.readCsv(file)))
 
   implicit val ord: Ordering[CsvFile] = Ordering.by(_.date)
 }
