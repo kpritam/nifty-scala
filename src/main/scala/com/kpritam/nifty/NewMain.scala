@@ -18,7 +18,7 @@ object NewMain extends App {
   def write(content: String, output: String) = Files.write(Paths.get(output), content.getBytes(StandardCharsets.UTF_8))
 
   Nifty
-    .readRows(folder, DayOfWeek.FRIDAY, DayOfWeek.THURSDAY, startTime = "9:30", endTime = "14:30")
+    .readRows(folder, DayOfWeek.THURSDAY, DayOfWeek.THURSDAY, startTime = "9:30", endTime = "14:30")
     .map(Nifty.toCsv)
     .map(write(_, output))
     .left

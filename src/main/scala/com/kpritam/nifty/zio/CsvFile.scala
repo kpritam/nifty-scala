@@ -5,9 +5,16 @@ import java.time.LocalDate
 
 import zio.Task
 import zio.stream._
+
 import scala.util.Try
 
-case class CsvFile(date: LocalDate, path: Path, data: Stream[Throwable, Row])
+case class CsvFile(date: LocalDate, path: Path, data: Stream[Throwable, Row]) {
+  private lazy val chunk = data.runCollect
+  def rowAt(time: String): Task[Row] =
+    chunk
+      .map(_.find(_.time.trim.startsWith(time)))
+      .someOrFail(new RuntimeException(s"$path does not contain row matching close time $time"))
+}
 
 object CsvFile {
   //name format -> GFDLNFO_NIFTY_CONTRACT_07042020.csv

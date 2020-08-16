@@ -3,14 +3,8 @@ package com.kpritam.nifty.zio
 import java.time.DayOfWeek
 
 import zio._
-import zio.console._
 
 import scala.annotation.tailrec
-
-case class Slot(files: List[CsvFile]) {
-  def prettyPrint: RIO[Console, List[Unit]] =
-    putStrLn("======= SLOT =======") *> ZIO.foreach(files)(f => putStrLn((f.date, f.date.getDayOfWeek).toString))
-}
 
 case class NiftyData(csvFiles: List[CsvFile]) {
 
@@ -41,8 +35,6 @@ case class NiftyData(csvFiles: List[CsvFile]) {
       case Nil           => IO.fail(s"File for $day not found in ${csvFiles.mkString("\n")}")
     }
 
-  private def partition(day: DayOfWeek, csvFiles: List[CsvFile]) =
-    csvFiles.partition(_.date.getDayOfWeek != day)
 }
 
 object NiftyData {
